@@ -1,14 +1,25 @@
-Please install 
+Node.JS VTT sample code
+============
+https://cloud.google.com/speech/docs/streaming-recognize#speech-streaming-mic-recognize-nodejs
 
-SOX on Mac for recording 
-brew install sox
+**Please install**
 
-Google cloud speech API for streaming
+1. SOX on Mac for recording
+```
+    brew install sox
+```
+
+2. Google cloud speech API for streaming
+```
 npm install --save @google-cloud/speech
+```
 
-Node recording library
+3. Node recording library
+```
 npm install node-record-lpcm16
+```
 
-
-Following command to run the code:
+**Following command to run the code**
+```
 node vtt.js
+```
