@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ var state = 'pause';
+
 (function helperDrawingFunctions() {
   CanvasRenderingContext2D.prototype.line = function(x1, y1, x2, y2) {
     this.lineCap = 'round';
@@ -69,22 +71,55 @@
   var playButton = document.getElementById('playbutton');
 
   playButton.addEventListener('click', function(e) {
-    if (this.classList.contains('playing')) {
-      playButton.dispatchEvent(new Event('pause'));
-    } else {
+    if (state != 'playing') {
       playButton.dispatchEvent(new Event('play'));
     }
   }, true);
 
   // Update the appearance when the state changes
   playButton.addEventListener('play', function(e) {
-    this.classList.add('playing');
+    state = 'playing';
   });
-  playButton.addEventListener('pause', function(e) {
-    this.classList.remove('playing');
+//  playButton.addEventListener('pause', function(e) {
+       //    this.classList.remove('playing');
+       //  });
+})();
+
+
+(function stopButtonHandler() {
+  // The play button is the canonical state, which changes via events.
+  var stopButton = document.getElementById('stopbutton');
+
+  stopButton.addEventListener('click', function(e) {
+    if (state == 'playing') {
+       stopButton.dispatchEvent(new Event('pause'));
+    }
+  }, true);
+
+  // Update the appearance when the state changes
+  stopButton.addEventListener('pause', function(e) {
+    state = 'pause';
   });
 })();
 
+
+
+(function resetButtonHandler() {
+  // The play button is the canonical state, which changes via events.
+  var resetButton = document.getElementById('resetbutton');
+
+  resetButton.addEventListener('click', function(e) {
+    if (state == 'playing') {
+       resetButton.dispatchEvent(new Event('pause'));
+    }
+    location.reload();
+  }, true);
+
+  // Update the appearance when the state changes
+  resetButton.addEventListener('pause', function(e) {
+    state = 'pause';
+  });
+})();
 
 (function audioInit() {
   // Check for non Web Audio API browsers.
@@ -139,10 +174,13 @@
   const SAMPLE_SIZE = 16;
 
   var playButton = document.getElementById('playbutton');
+  var stopButton = document.getElementById('stopbutton');
+  var resetButton = document.getElementById('resetbutton');
 
   // Hook up the play/pause state to the microphone context
   var context = new (window.AudioContext || window.webkitAudioContext)();
-  playButton.addEventListener('pause', context.suspend.bind(context));
+  stopButton.addEventListener('pause', context.suspend.bind(context));
+  resetButton.addEventListener('pause', context.suspend.bind(context));
   playButton.addEventListener('play', context.resume.bind(context));
 
   // The first time you hit play, connect to the microphone
@@ -203,8 +241,14 @@
         // If the socket is closed for whatever reason, pause the mic
         socket.addEventListener('close', function(e) {
           console.log('Websocket closing..');
-          playButton.dispatchEvent(new Event('pause'));
-          playButton.dispatchEvent(new Event('play'));
+
+          if(state =='playing'){
+            stopButton.dispatchEvent(new Event('pause'));
+            playButton.dispatchEvent(new Event('play'));
+            }
+          else{
+            stopButton.dispatchEvent(new Event('pause'));
+           }
         });
         socket.addEventListener('error', function(e) {
           console.log('Error from websocket', e);
@@ -258,10 +302,14 @@
       var result = JSON.parse(e.data);
       if (result.alternatives_) {
         transcript.current.innerHTML = result.alternatives_[0].transcript_;
-      }
+            }
+
       if (result.isFinal_) {
+
         transcript.current = document.createElement('div');
         transcript.el.appendChild(transcript.current);
+
+
       }
     }
 
